@@ -1,7 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Resource } from '../resource';
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged, finalize,
+  of,
+  Subject,
+  switchMap
+} from 'rxjs';
 import { Todo } from '../types';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
@@ -14,7 +21,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 })
 export class TodoSearchComponent {
   private readonly resource = inject(Resource);
-  readonly $results = new Subject<Todo[]>();
+  readonly $results = new BehaviorSubject<Todo[]>([]);
+  readonly isLoading$ = new BehaviorSubject<boolean>(false);
+
   readonly searchControl = new FormControl('');
 
   constructor() {
@@ -23,13 +32,24 @@ export class TodoSearchComponent {
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((q) => {
-          if (q === '') {
-            this.$results.next([]);
-            return [];
+          if (!q || q.trim() === '') {
+            this.isLoading$.next(false);
+            return of([] as Todo[]);
           }
-          return this.resource.getTodosByTitle(q || '');
-        }),
+
+          this.isLoading$.next(true);
+          return this.resource.getTodosByTitle(q.trim()).pipe(
+            finalize(() => this.isLoading$.next(false))
+          );
+        })
       )
-      .subscribe(this.$results);
+      .subscribe({
+        next: (todos) => this.$results.next(todos),
+        error: () => {
+          // On error, ensure lading is turned off and push empty results
+          this.isLoading$.next(false);
+          this.$results.next([]);
+        },
+      });
   }
 }
