@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Resource } from '../resource';
 import {
@@ -6,11 +6,11 @@ import {
   debounceTime,
   distinctUntilChanged, finalize,
   of,
-  Subject,
   switchMap
 } from 'rxjs';
 import { Todo } from '../types';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-todo-search',
@@ -21,9 +21,10 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 })
 export class TodoSearchComponent {
   private readonly resource = inject(Resource);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly $results = new BehaviorSubject<Todo[]>([]);
   readonly isLoading$ = new BehaviorSubject<boolean>(false);
-
   readonly searchControl = new FormControl('');
 
   constructor() {
@@ -41,7 +42,8 @@ export class TodoSearchComponent {
           return this.resource.getTodosByTitle(q.trim()).pipe(
             finalize(() => this.isLoading$.next(false))
           );
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: (todos) => this.$results.next(todos),
