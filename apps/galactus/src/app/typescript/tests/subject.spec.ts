@@ -1,4 +1,4 @@
-import { createSubject, SimpleSubject, Subject } from './subject';
+import { createSubject, SimpleSubject, Subject } from '../subject';
 
 const implementations: [name: string, factory: <T>() => Subject<T>][] = [
   ['class-based', <T>() => new SimpleSubject<T>()],
@@ -100,5 +100,55 @@ implementations.forEach(([name, create]) => {
 
       expect(listener).toHaveBeenCalledWith({ message: 'Typed event' });
     });
+
+    it('should return a subscription object with unsubscribe()', () => {
+      const subject = create<string>();
+      const listener = vi.fn();
+
+      const subscription = subject.subscribe(listener);
+      expect(typeof subscription.unsubscribe).toBe('function');
+      expect(subscription.closed).toBe(false);
+
+      subject.next('first');
+      subscription.unsubscribe();
+
+      expect(subscription.closed).toBe(true);
+      subject.next('second');
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith('first');
+    });
+
+    it('should ignore unsubscribe() calls after already unsubscribed', () => {
+      const subject = create<number>();
+      const listener = vi.fn();
+
+      const subscription = subject.subscribe(listener);
+      subscription.unsubscribe();
+      subscription.unsubscribe(); // double unsubscribe (should not throw)
+      subject.next(42);
+
+      expect(subscription.closed).toBe(true);
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('should allow multiple subscriptions and independent unsubscriptions', () => {
+      const subject = create<string>();
+      const listener1 = vi.fn();
+      const listener2 = vi.fn();
+
+      const sub1 = subject.subscribe(listener1);
+      const sub2 = subject.subscribe(listener2);
+
+      subject.next('A');
+      sub1.unsubscribe();
+      subject.next('B');
+      sub2.unsubscribe();
+      subject.next('C');
+
+      expect(listener1.mock.calls.map(c => c[0])).toEqual(['A']);
+      expect(listener2.mock.calls.map(c => c[0])).toEqual(['A', 'B']);
+    });
+
   });
 });

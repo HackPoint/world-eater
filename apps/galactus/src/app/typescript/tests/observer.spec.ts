@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ConcreteObservable, Observer } from './observer';
+import { ConcreteObservable, Observer } from '../observer';
 
 describe('Observer Pattern', () => {
   it('should notify a subscribed observer with the correct value', () => {

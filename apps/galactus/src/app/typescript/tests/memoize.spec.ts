@@ -1,5 +1,5 @@
 import { describe } from 'vitest';
-import { memoize } from './memoize';
+import { memoize } from '../memoize';
 
 describe('memoized', () => {
   it('should return the correct result', () => {

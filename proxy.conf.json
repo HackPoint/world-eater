@@ -1,0 +1,10 @@
+{
+  "/api/settings": {
+    "target": "https://mocki.io",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/settings": "/v1/7b9a9a7c-e5b1-47e5-9e6e-63c98d5ebbb1"
+    }
+  }
+}

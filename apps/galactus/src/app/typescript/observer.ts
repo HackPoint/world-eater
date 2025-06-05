@@ -1,5 +1,5 @@
 export interface Observer<T> {
-  update(value: T): void;
+      update(value: T): void;
 }
 
 export interface Observable<T> {

@@ -1,0 +1,37 @@
+<div class="min-h-screen bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    @let dashboard = $dashboard | async;
+
+    <!-- Profile Card -->
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col items-center text-center">
+      @if (dashboard?.profile?.avatarUrl) {
+        <img
+          width="96"
+          height="96"
+          ngSrc="{{dashboard?.profile?.avatarUrl}}"
+          class="w-24 h-24 rounded-full shadow mb-4"
+          alt="Avatar"
+           />
+      }
+      <h2 id="name" class="text-xl font-semibold">Loading...</h2>
+      <p id="userId" class="text-sm text-gray-500 mt-1"></p>
+    </div>
+
+    <!-- Notifications Card -->
+    <div class="bg-white rounded-2xl shadow p-6 flex flex-col items-center justify-center text-center">
+      <h2 class="text-xl font-semibold text-blue-600 mb-2">Unread Notifications</h2>
+      <span id="notificationCount" class="text-4xl font-bold text-gray-800">–</span>
+    </div>
+
+    <!-- Settings Card -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4 text-green-600">User Settings</h2>
+      <ul class="text-gray-700 space-y-2">
+        <li><strong>Dark Mode:</strong> <span id="darkMode">–</span></li>
+        <li><strong>Language:</strong> <span id="language">–</span></li>
+        <li><strong>Email Notifications:</strong> <span id="emailNotifications">–</span></li>
+      </ul>
+    </div>
+
+  </div>
+</div>

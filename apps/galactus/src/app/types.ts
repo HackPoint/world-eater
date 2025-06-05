@@ -1,4 +1,5 @@
-export type Todo =  {
+export type Todo = {
   readonly id: number;
   readonly title: string;
-}
+};
+
